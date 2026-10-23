@@ -1,0 +1,31 @@
+[{
+        "id": 1,
+        "name": "Vintage Denim Jacket",
+        "price": "Rp275.000",
+        "bidder": 0,
+        "image": "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3",
+        "category": "Fashion",
+        "seller": "Vintage Store",
+        "condition": "Good"
+    },
+    {
+        "id": 2,
+        "name": "iPhone Second",
+        "price": "Rp2.500.000",
+        "bidder": 0,
+        "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9",
+        "category": "Electronic",
+        "seller": "Gadget Shop",
+        "condition": "Like New"
+    },
+    {
+        "id": 3,
+        "name": "Sneakers Limited",
+        "price": "Rp450.000",
+        "bidder": 0,
+        "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+        "category": "Shoes",
+        "seller": "Sneaker House",
+        "condition": "Excellent"
+    }
+]
