@@ -1,0 +1,18 @@
+BIDLY - TAMBAHAN MODUL 2 UNTUK PEKAN DEMO
+
+Kode awal dipertahankan. Penambahan:
+1. useEffect pada src/app/index.tsx untuk memantau perubahan halaman.
+2. Tombol LIHAT DETAIL pada kartu produk memakai router.push().
+3. Halaman detail produk di src/app/product/[id].tsx (dynamic route).
+4. router.back() untuk kembali ke halaman sebelumnya.
+5. router.replace("/") untuk kembali ke beranda tanpa menumpuk halaman sebelumnya.
+6. src/app/_layout.tsx memakai Stack dan Stack.Screen untuk mendaftarkan halaman.
+
+Menjalankan:
+1. Ekstrak ZIP.
+2. Buka folder projectmobile di VS Code.
+3. Jalankan npm install jika dependencies belum ada.
+4. Jalankan npx expo start --go.
+5. Scan QR dengan Expo Go.
+
+Catatan: folder node_modules dan cache .expo tidak disertakan agar ZIP lebih ringan.
