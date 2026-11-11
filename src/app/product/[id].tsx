@@ -30,6 +30,13 @@ export default function ProductDetail() {
   const params = useLocalSearchParams<{
     id: string;
     source?: string;
+    name?: string;
+    price?: string;
+    image?: string;
+    category?: string;
+    seller?: string;
+    condition?: string;
+    bidder?: string;
   }>();
 
   const id = Number(params.id);
@@ -84,7 +91,19 @@ export default function ProductDetail() {
   // Produk lelang lama menggunakan data lokal.
   const localProduct = isApiProduct
     ? undefined
-    : localProducts.find((item) => item.id === id);
+    : localProducts.find((item) => item.id === id) ??
+      (params.name && params.price && params.image
+        ? {
+            id,
+            name: params.name,
+            price: params.price,
+            image: params.image,
+            category: params.category ?? "Lainnya",
+            seller: params.seller ?? "User",
+            condition: params.condition ?? "Preloved",
+            bidder: Number(params.bidder ?? 0),
+          }
+        : undefined);
 
   if (loading) {
     return (

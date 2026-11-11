@@ -24,23 +24,42 @@ export async function fetchApiProducts(signal?: AbortSignal, endpoint = "https:/
   try {
     response = await fetch(endpoint, { signal });
   } catch (error) {
-    if (signal?.aborted) throw error;
-    throw new ProductApiError("network", "Tidak ada koneksi atau request gagal. Periksa internet lalu coba lagi.");
+    if (signal?.aborted) return Promise.reject(error);
+    return Promise.reject(
+      new ProductApiError("network", "Tidak ada koneksi atau request gagal. Periksa internet lalu coba lagi.")
+    );
   }
   if (!response.ok) {
     if (response.status >= 400 && response.status < 500) {
-      throw new ProductApiError("client", `Permintaan tidak dapat diproses (HTTP ${response.status}).`, response.status);
+      return Promise.reject(
+        new ProductApiError("client", `Permintaan tidak dapat diproses (HTTP ${response.status}).`, response.status)
+      );
     }
     if (response.status >= 500) {
-      throw new ProductApiError("server", `Server sedang bermasalah (HTTP ${response.status}). Silakan coba lagi.`, response.status);
+      return Promise.reject(
+        new ProductApiError("server", `Server sedang bermasalah (HTTP ${response.status}). Silakan coba lagi.`, response.status)
+      );
     }
-    throw new ProductApiError("unknown", `Request gagal (HTTP ${response.status}).`, response.status);
+    return Promise.reject(
+      new ProductApiError("unknown", `Request gagal (HTTP ${response.status}).`, response.status)
+    );
   }
+
+  let data: ProductsResponse;
   try {
-    const data: ProductsResponse = await response.json();
-    if (!Array.isArray(data.products)) throw new Error("Invalid response");
-    return data.products;
+    data = await response.json();
   } catch {
-    throw new ProductApiError("unknown", "Format data dari server tidak sesuai.");
+    return Promise.reject(
+      new ProductApiError("unknown", "Format data dari server tidak sesuai.")
+    );
   }
+
+  if (!Array.isArray(data.products)) {
+    return Promise.reject(
+      new ProductApiError("unknown", "Format data dari server tidak sesuai.")
+    );
+  }
+
+  // Resolve mengembalikan daftar produk ketika response API valid.
+  return Promise.resolve(data.products);
 }

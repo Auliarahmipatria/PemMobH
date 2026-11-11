@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import ApiProductsSection from "../components/ApiProductsSection";
+import CreateListingModal from "../components/CreateListingModal";
 import type { Product } from "../models/Product";
 import {
   authenticateBiometric,
@@ -39,6 +40,7 @@ export default function Index() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showBid, setShowBid] = useState(false);
+  const [showCreateListing, setShowCreateListing] = useState(false);
   const [bidAmount, setBidAmount] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -102,6 +104,17 @@ export default function Index() {
           : product
       )
     );
+  };
+
+  const addListing = (listing: Omit<Product, "id" | "bidder">) => {
+    const newProduct: Product = {
+      ...listing,
+      id: Date.now(),
+      bidder: 0,
+    };
+    setProducts(currentProducts => [newProduct, ...currentProducts]);
+    setShowCreateListing(false);
+    Alert.alert("Barang diterbitkan", "Barang baru sudah ditambahkan ke daftar lelang.");
   };
 
   const [products, setProducts] = useState<Product[]>([
@@ -278,8 +291,11 @@ export default function Index() {
           lelang real-time.
         </Text>
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Mulai Lelang</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setShowCreateListing(true)}
+        >
+          <Text style={styles.buttonText}>JUAL BARANG</Text>
         </TouchableOpacity>
       </View>
 
@@ -293,7 +309,7 @@ export default function Index() {
               styles.card,
               { width: isDesktop ? "32%" : "100%" }
             ]}
-            key={index}
+            key={item.id}
           >
             <Image
               source={{ uri: item.image }}
@@ -301,7 +317,7 @@ export default function Index() {
             />
 
             <Text style={styles.product}>{item.name}</Text>
-            <Text>⭐ Seller Verified</Text>
+            <Text>⭐ {item.seller}</Text>
             <Text style={styles.price}>{item.price}</Text>
             <Text>👥 {item.bidder} Bidder</Text>
 
@@ -313,7 +329,16 @@ export default function Index() {
               onPress={() =>
                 router.push({
                   pathname: "/product/[id]",
-                  params: { id: String(item.id) }
+                params: {
+                  id: String(item.id),
+                  name: item.name,
+                  price: item.price,
+                  image: item.image,
+                  category: item.category,
+                  seller: item.seller,
+                  condition: item.condition,
+                  bidder: String(item.bidder),
+                }
                 })
               }
             >
@@ -332,6 +357,13 @@ export default function Index() {
           </View>
         ))}
       </View>
+
+      <CreateListingModal
+        visible={showCreateListing}
+        sellerName={username.trim() || email.split("@")[0] || "User"}
+        onClose={() => setShowCreateListing(false)}
+        onSubmit={addListing}
+      />
 
       {/* Modul 3: fitur API tetap dipertahankan */}
       <ApiProductsSection />

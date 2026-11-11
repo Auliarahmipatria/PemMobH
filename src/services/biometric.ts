@@ -47,6 +47,8 @@ export async function authenticateBiometric(
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage,
       cancelLabel: "Batal",
+      disableDeviceFallback: Platform.OS === "ios",
+      fallbackLabel: Platform.OS === "ios" ? "" : undefined,
     });
     return result.success;
   } catch {
