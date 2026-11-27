@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import ApiProductsSection from "../components/ApiProductsSection";
 import CreateListingModal from "../components/CreateListingModal";
+import PushNotificationCard from "../components/PushNotificationCard";
 import type { Product } from "../models/Product";
 import {
   authenticateBiometric,
@@ -298,6 +299,11 @@ export default function Index() {
           <Text style={styles.buttonText}>JUAL BARANG</Text>
         </TouchableOpacity>
       </View>
+
+      <PushNotificationCard
+        userEmail={email}
+        demoProduct={products[0]}
+      />
 
       <Text style={styles.section}>🔥 Live Auction</Text>
 

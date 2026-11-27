@@ -39,8 +39,26 @@
           "faceIDPermission": "Izinkan Bidly memakai Face ID untuk login dan konfirmasi bid."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "auction-updates"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Izinkan Bidly memakai lokasi saat aplikasi digunakan untuk menentukan titik COD."
+        }
+      ],
       "expo-secure-store"
     ],
+    "extra": {
+      "eas": {
+        "projectId": "025b64c4-6010-4469-abef-207fb44530bf"
+      },
+      "pushApiUrl": ""
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
