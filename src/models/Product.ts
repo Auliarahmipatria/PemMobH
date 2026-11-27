@@ -1,3 +1,12 @@
+export interface PickupLocation {
+  latitude: number;
+  longitude: number;
+  accuracy: number | null;
+  address: string;
+}
+
+export type PickupCoordinates = Pick<PickupLocation, "latitude" | "longitude">;
+
 export interface Product {
   id: number;
   name: string;
@@ -7,4 +16,5 @@ export interface Product {
   category: string;
   seller: string;
   condition: string;
+  pickupLocation?: PickupLocation;
 }
