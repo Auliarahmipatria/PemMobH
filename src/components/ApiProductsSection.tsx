@@ -17,7 +17,8 @@ import {
 
 import {
   fetchApiProducts,
-  ProductApiError
+  ProductApiError,
+  updateApiProduct,
 } from "../services/productApi";
 
 import type { ApiProduct } from "../services/productApi";
@@ -206,6 +207,8 @@ export default function ApiProductsSection() {
     useState<ApiProduct | null>(null);
   const [bidAmount, setBidAmount] = useState("");
   const [showBid, setShowBid] = useState(false);
+  const [bidSubmitting, setBidSubmitting] = useState(false);
+  const [bidError, setBidError] = useState("");
 
   const controller = useRef<AbortController | null>(null);
 
@@ -241,10 +244,11 @@ const openProductDetail = (product: ApiProduct) => {
   const openBidModal = (product: ApiProduct) => {
     setSelectedProduct(product);
     setBidAmount("");
+    setBidError("");
     setShowBid(true);
   };
 
-  const submitBid = () => {
+  const submitBid = async () => {
     if (!selectedProduct) return;
 
     // Input rupiah, misalnya 500000 atau 500.000.
@@ -261,27 +265,41 @@ const openProductDetail = (product: ApiProduct) => {
     }
 
     const productId = selectedProduct.id;
+    setBidSubmitting(true);
+    setBidError("");
 
-    setBids(previous => {
-      const oldBid = previous[productId];
+    try {
+      // PATCH mengirim perubahan bid ke endpoint latihan; DummyJSON tidak menyimpannya permanen.
+      await updateApiProduct(productId, { price: amount, currency: "IDR" });
 
-      return {
-        ...previous,
-        [productId]: {
-          amount,
-          bidders: (oldBid?.bidders ?? 0) + 1
-        }
-      };
-    });
+      setBids(previous => {
+        const oldBid = previous[productId];
 
-    setShowBid(false);
-    setSelectedProduct(null);
-    setBidAmount("");
+        return {
+          ...previous,
+          [productId]: {
+            amount,
+            bidders: (oldBid?.bidders ?? 0) + 1
+          }
+        };
+      });
 
-    Alert.alert(
-      "Bid Berhasil",
-      `Penawaran ${formatRupiah(amount)} berhasil dicatat sementara.`
-    );
+      setShowBid(false);
+      setSelectedProduct(null);
+      setBidAmount("");
+      Alert.alert(
+        "Bid Berhasil",
+        `PATCH berhasil. Penawaran ${formatRupiah(amount)} ditampilkan sementara; endpoint demo tidak menyimpan perubahan.`
+      );
+    } catch (requestError: unknown) {
+      setBidError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Bid gagal dikirim. Periksa koneksi lalu coba lagi."
+      );
+    } finally {
+      setBidSubmitting(false);
+    }
   };
 
   const loadProducts = useCallback(() => {
@@ -524,7 +542,11 @@ const openProductDetail = (product: ApiProduct) => {
         visible={showBid}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowBid(false)}
+        onRequestClose={() => {
+          if (bidSubmitting) return;
+          setShowBid(false);
+          setBidError("");
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -555,23 +577,28 @@ const openProductDetail = (product: ApiProduct) => {
                 keyboardType="numeric"
                 value={bidAmount}
                 onChangeText={setBidAmount}
+                editable={!bidSubmitting}
               />
 
+              {bidError ? <Text style={styles.modalError}>{bidError}</Text> : null}
+
               <TouchableOpacity
-                style={styles.bidButton}
+                style={[styles.bidButton, bidSubmitting && styles.disabledButton]}
+                disabled={bidSubmitting}
                 onPress={submitBid}
               >
-                <Text style={styles.buttonText}>
-                  KONFIRMASI BID
-                </Text>
+                {bidSubmitting ? <ActivityIndicator size="small" color="#fff" /> : null}
+                <Text style={styles.buttonText}>{bidSubmitting ? "MENGIRIM BID..." : "KONFIRMASI BID"}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
+                disabled={bidSubmitting}
                 style={styles.cancelButton}
                 onPress={() => {
                   setShowBid(false);
                   setSelectedProduct(null);
                   setBidAmount("");
+                  setBidError("");
                 }}
               >
                 <Text style={styles.cancelText}>
@@ -580,8 +607,7 @@ const openProductDetail = (product: ApiProduct) => {
               </TouchableOpacity>
 
               <Text style={styles.modalNote}>
-                Penawaran ini hanya simulasi lokal,
-                belum tersimpan di server.
+                Bid dikirim dengan PATCH ke DummyJSON untuk latihan. Responsnya simulasi dan tidak tersimpan permanen.
               </Text>
             </ScrollView>
           </View>
@@ -728,6 +754,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center"
   },
+  disabledButton: { opacity: 0.6 },
   buttonText: {
     color: "white",
     fontWeight: "bold",
@@ -784,6 +811,12 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 16,
     marginBottom: 20
+  },
+  modalError: {
+    color: "#b42318",
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 12,
   },
   cancelButton: {
     alignItems: "center",
